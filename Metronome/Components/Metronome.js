@@ -11,20 +11,36 @@ import {
 } from "react-native";
 
 export default function Metronome() {
-  let BPM = 2000;
+  let BPM = 3000;
+  let rotation = false;
   const [metronomInicializator, setMetronomeInicializator] = useState(false);
+  const [startingPos, setStartingPos] = useState(false);
   let rotateValueHolder = new Animated.Value(0);
 
   const startMetronome = () => {
-    rotateValueHolder.setValue(0);
+    let continuingPos;
+    let endingPos;
+    // here by ! i can change position of the starting TIK
+    if (rotation) {
+      continuingPos = 1;
+      endingPos = 0;
+      rotation = !rotation;
+    } else {
+      continuingPos = 0;
+      endingPos = 1;
+      rotation = !rotation;
+    }
+
+    rotateValueHolder.setValue(continuingPos);
     Animated.timing(rotateValueHolder, {
-      toValue: 1,
+      toValue: endingPos,
       duration: BPM,
       easing: Easing.linear,
       useNativeDriver: false,
     }).start(() => startMetronome());
   };
 
+  // start and stop the metronome
   const runMetronome = () => {
     setMetronomeInicializator(!metronomInicializator);
   };
@@ -37,21 +53,19 @@ export default function Metronome() {
 
   const RotatePointer = rotateValueHolder.interpolate({
     inputRange: [0, 1],
-    outputRange: ["-45deg", "45deg"],
+    outputRange: ["-35deg", "35deg"],
   });
 
   return (
     <>
-      <>
-        <View style={styles.pointerCoolio}>
-          <Animated.View style={[styles.pointerFlex, { transform: [{ rotate: RotatePointer }] }]}>
-            <Image style={styles.pointer} source={require("../assets/pointer.png")} />
-          </Animated.View>
-        </View>
-        <TouchableHighlight style={styles.titleText} onPress={runMetronome}>
-          <Text style={styles.title}>We are workin on the motronome app!</Text>
-        </TouchableHighlight>
-      </>
+      <View style={styles.pointerCoolio}>
+        <Animated.View style={[styles.pointerFlex, { transform: [{ rotate: RotatePointer }] }]}>
+          <Image style={styles.pointer} source={require("../assets/pointer.png")} />
+        </Animated.View>
+      </View>
+      <TouchableHighlight style={styles.titleText} onPress={runMetronome}>
+        <Text style={styles.title}>We are workin on the motronome app!</Text>
+      </TouchableHighlight>
     </>
   );
 }
@@ -67,7 +81,7 @@ const styles = StyleSheet.create({
   },
   pointerCoolio: {
     width: 50,
-    height: 250,
+    height: 300,
   },
   pointerFlex: {
     flex: 1,
