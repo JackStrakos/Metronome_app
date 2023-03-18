@@ -1,21 +1,14 @@
-import { useState, useEffect } from "react";
-import {
-  Button,
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  Animated,
-  TouchableHighlight,
-  Easing,
-} from "react-native";
+import { useState, useEffect, useRef } from "react";
+import { StyleSheet, Text, View, Image, Animated, TouchableHighlight, Easing } from "react-native";
 
 export default function Metronome() {
-  let BPM = 3000;
-  let rotation = false;
   const [metronomInicializator, setMetronomeInicializator] = useState(false);
-  const [startingPos, setStartingPos] = useState(false);
-  let rotateValueHolder = new Animated.Value(0);
+  const [pointerPosition, setPointerPosition] = useState(0);
+  const [tik, setTik] = useState(1);
+
+  let BPM = 1500;
+  let rotation = false;
+  const rotateValueHolder = useRef(new Animated.Value(0)).current;
 
   const startMetronome = () => {
     let continuingPos;
@@ -24,25 +17,31 @@ export default function Metronome() {
     if (rotation) {
       continuingPos = 1;
       endingPos = 0;
-      rotation = !rotation;
     } else {
       continuingPos = 0;
       endingPos = 1;
-      rotation = !rotation;
     }
-
+    rotation = !rotation;
+    console.log(tik);
     rotateValueHolder.setValue(continuingPos);
     Animated.timing(rotateValueHolder, {
       toValue: endingPos,
       duration: BPM,
       easing: Easing.linear,
       useNativeDriver: false,
-    }).start(() => startMetronome());
+      loop: false,
+    }).start(() => {
+      if (metronomInicializator) {
+        setTik((prev) => prev + 1);
+        startMetronome();
+      }
+    });
   };
 
   // start and stop the metronome
   const runMetronome = () => {
     setMetronomeInicializator(!metronomInicializator);
+    console.log(metronomInicializator);
   };
 
   useEffect(() => {
@@ -56,6 +55,16 @@ export default function Metronome() {
     outputRange: ["-35deg", "35deg"],
   });
 
+  RotatePointer.addListener(({ value }) => {
+    setPointerPosition(value);
+  });
+
+  if (pointerPosition === -35) {
+    console.log("-35");
+  } else if (pointerPosition === 35) {
+    console.log("35");
+  }
+
   return (
     <>
       <View style={styles.pointerCoolio}>
@@ -63,6 +72,7 @@ export default function Metronome() {
           <Image style={styles.pointer} source={require("../assets/pointer.png")} />
         </Animated.View>
       </View>
+      <Text style={styles.pong}>{tik}</Text>
       <TouchableHighlight style={styles.titleText} onPress={runMetronome}>
         <Text style={styles.title}>We are workin on the motronome app!</Text>
       </TouchableHighlight>
@@ -91,5 +101,8 @@ const styles = StyleSheet.create({
   pointer: {
     width: 20,
     height: "65%",
+  },
+  pong: {
+    backgroundColor: "green",
   },
 });
