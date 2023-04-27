@@ -1,14 +1,30 @@
 import { useState, useEffect, useRef } from "react";
-import { StyleSheet, Text, View, Image, Animated, TouchableHighlight, Easing } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Image,
+  Animated,
+  TouchableHighlight,
+  Easing,
+  TextInput,
+} from "react-native";
 
 export default function Metronome() {
   const [metronomInicializator, setMetronomeInicializator] = useState(false);
   const [pointerPosition, setPointerPosition] = useState(0);
   const [tik, setTik] = useState(1);
+  const [BPM, setBPM] = useState(120);
 
-  let BPM = 1500;
   let rotation = false;
   const rotateValueHolder = useRef(new Animated.Value(0)).current;
+  const animation = useRef(null);
+
+  // MAYBE SWITCHING BETWEEN ANIMATIONS => ONE ANIMATION FOR RUNNING AND ONE FOR GETTING BACK TO DEFAULT POSE ???
+  // const standByMetronom = () => {
+  //   rotateValueHolder.setValue(0);
+  //   console.log("standBy");
+  // };
 
   const startMetronome = () => {
     let continuingPos;
@@ -22,32 +38,39 @@ export default function Metronome() {
       endingPos = 1;
     }
     rotation = !rotation;
-    console.log(tik);
     rotateValueHolder.setValue(continuingPos);
-    Animated.timing(rotateValueHolder, {
+    animation.current = Animated.timing(rotateValueHolder, {
       toValue: endingPos,
-      duration: BPM,
+      duration: 60000 / BPM,
       easing: Easing.linear,
       useNativeDriver: false,
       loop: false,
-    }).start(() => {
-      if (metronomInicializator) {
+    });
+    if (metronomInicializator) {
+      animation.current.start(() => {
         setTik((prev) => prev + 1);
         startMetronome();
-      }
-    });
+      });
+    } else {
+      stopMetronome();
+    }
+  };
+
+  const stopMetronome = () => {
+    animation.current.stop();
   };
 
   // start and stop the metronome
   const runMetronome = () => {
     setMetronomeInicializator(!metronomInicializator);
-    console.log(metronomInicializator);
   };
 
   useEffect(() => {
     if (metronomInicializator) {
       startMetronome();
-    }
+    } /* else if (!metronomInicializator) {
+      standByMetronom();
+    } */
   }, [metronomInicializator]);
 
   const RotatePointer = rotateValueHolder.interpolate({
@@ -67,6 +90,16 @@ export default function Metronome() {
 
   return (
     <>
+      <View style={styles.BPMLabel}>
+        <Text style={styles.BMP}>BPM: </Text>
+        <TextInput
+          style={styles.BMP}
+          onChangeText={(text) => setBPM(text)}
+          value={BPM}
+          keyboardType="numeric"
+          placeholder="120"
+        />
+      </View>
       <View style={styles.pointerCoolio}>
         <Animated.View style={[styles.pointerFlex, { transform: [{ rotate: RotatePointer }] }]}>
           <Image style={styles.pointer} source={require("../assets/pointer.png")} />
@@ -104,5 +137,14 @@ const styles = StyleSheet.create({
   },
   pong: {
     backgroundColor: "green",
+  },
+  BPMLabel: {
+    flex: 2,
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  BPM: {
+    height: "10%",
+    width: "20%",
   },
 });
