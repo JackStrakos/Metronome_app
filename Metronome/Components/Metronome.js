@@ -9,14 +9,18 @@ import {
   Easing,
   TextInput,
 } from "react-native";
+import { log } from "react-native-reanimated";
 
 export default function Metronome() {
   const [metronomInicializator, setMetronomeInicializator] = useState(false);
   const [pointerPosition, setPointerPosition] = useState(0);
   const [tik, setTik] = useState(1);
   const [BPM, setBPM] = useState(120);
+  const [periodFrom, setPeriodFrom] = useState(4);
+  const [period, setPeriod] = useState(4);
 
   let rotation = false;
+  let periodSignal = false;
   const rotateValueHolder = useRef(new Animated.Value(0)).current;
   const animation = useRef(null);
 
@@ -44,31 +48,44 @@ export default function Metronome() {
       duration: 60000 / BPM,
       easing: Easing.linear,
       useNativeDriver: false,
-      loop: false,
+      loop: alse,
     });
-    if (metronomInicializator) {
-      animation.current.start(() => {
-        setTik((prev) => prev + 1);
+    animation.current.start(() => {
+      if (metronomInicializator) {
         startMetronome();
-      });
-    } else {
-      stopMetronome();
-    }
+      }
+      setTik((prev) => prev + 1);
+      if (tik % period == 0) {
+        periodSignal = !periodSignal;
+      } else {
+        periodSignal = !periodSignal;
+      }
+      // console.log("spoustim");
+      // startMetronome();
+    });
+
+    // console.log("vypinam tvoji mamu");
+    // rotateValueHolder.setValue(0);
+    // Animated.timing(rotateValueHolder).stop();
+
+    // animation.current.stop();
+    // stopMetronome();
   };
 
-  const stopMetronome = () => {
-    animation.current.stop();
-  };
+  // const stopMetronome = () => {
+  //   animation.current.stop();
+  // };
 
   // start and stop the metronome
-  const runMetronome = () => {
+  const toggleMetronome = () => {
+    // console.log(metronomInicializator);
     setMetronomeInicializator(!metronomInicializator);
   };
 
   useEffect(() => {
-    if (metronomInicializator) {
-      startMetronome();
-    } /* else if (!metronomInicializator) {
+    console.log(metronomInicializator);
+    startMetronome();
+    /* else if (!metronomInicializator) {
       standByMetronom();
     } */
   }, [metronomInicializator]);
@@ -90,23 +107,44 @@ export default function Metronome() {
 
   return (
     <>
-      <View style={styles.BPMLabel}>
-        <Text style={styles.BMP}>BPM: </Text>
-        <TextInput
-          style={styles.BMP}
-          onChangeText={(text) => setBPM(text)}
-          value={BPM}
-          keyboardType="numeric"
-          placeholder="120"
-        />
+      <View style={styles.setMetronome}>
+        <View style={styles.periodHolder}>
+          <Text style={styles.period}>Period: </Text>
+          <TextInput
+            style={styles.period}
+            onChangeText={(text) => setPeriod(text)}
+            value={period}
+            keyboardType="numeric"
+            placeholder={period}
+          />
+          <Text style={styles.period}> / </Text>
+          <TextInput
+            style={styles.period}
+            onChangeText={(text) => setPeriodFrom(text)}
+            value={periodFrom}
+            keyboardType="numeric"
+            placeholder={periodFrom}
+          />
+        </View>
+        <View style={styles.BPMLabel}>
+          <Text style={styles.BMP}>BPM: </Text>
+          <TextInput
+            style={styles.BMP}
+            onChangeText={(text) => setBPM(text)}
+            value={BPM}
+            keyboardType="numeric"
+            placeholder={BPM}
+          />
+        </View>
       </View>
       <View style={styles.pointerCoolio}>
         <Animated.View style={[styles.pointerFlex, { transform: [{ rotate: RotatePointer }] }]}>
           <Image style={styles.pointer} source={require("../assets/pointer.png")} />
+          <View style={styles.periodSignal}></View>
         </Animated.View>
       </View>
       <Text style={styles.pong}>{tik}</Text>
-      <TouchableHighlight style={styles.titleText} onPress={runMetronome}>
+      <TouchableHighlight style={styles.titleText} onPress={toggleMetronome}>
         <Text style={styles.title}>We are workin on the motronome app!</Text>
       </TouchableHighlight>
     </>
@@ -146,5 +184,24 @@ const styles = StyleSheet.create({
   BPM: {
     height: "10%",
     width: "20%",
+  },
+  setMetronome: {
+    flex: 3,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-evenly",
+  },
+  periodHolder: {
+    flex: 4,
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  periodSignal: {
+    width: "40%",
+    height: undefined,
+    aspectRatio: 1 / 1,
+    borderRadius: "50%",
+    borderWidth: 5,
+    borderColor: "red",
   },
 });
