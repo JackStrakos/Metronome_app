@@ -9,85 +9,62 @@ import {
   Easing,
   TextInput,
 } from "react-native";
-import { log } from "react-native-reanimated";
 
 export default function Metronome() {
   const [metronomInicializator, setMetronomeInicializator] = useState(false);
-  const [pointerPosition, setPointerPosition] = useState(0);
-  const [tik, setTik] = useState(1);
+  const [tik, setTik] = useState(0);
   const [BPM, setBPM] = useState(120);
   const [periodFrom, setPeriodFrom] = useState(4);
   const [period, setPeriod] = useState(4);
+  const [pointerPosition, setPointerPosition] = useState(null);
 
-  let rotation = false;
   let periodSignal = false;
-  const rotateValueHolder = useRef(new Animated.Value(0)).current;
-  const animation = useRef(null);
-
-  // MAYBE SWITCHING BETWEEN ANIMATIONS => ONE ANIMATION FOR RUNNING AND ONE FOR GETTING BACK TO DEFAULT POSE ???
-  // const standByMetronom = () => {
-  //   rotateValueHolder.setValue(0);
-  //   console.log("standBy");
-  // };
+  const rotateValueHolder = useRef(new Animated.Value(0.5)).current;
 
   const startMetronome = () => {
-    let continuingPos;
-    let endingPos;
-    // here by ! i can change position of the starting TIK
-    if (rotation) {
-      continuingPos = 1;
-      endingPos = 0;
-    } else {
-      continuingPos = 0;
-      endingPos = 1;
-    }
-    rotation = !rotation;
-    rotateValueHolder.setValue(continuingPos);
-    animation.current = Animated.timing(rotateValueHolder, {
-      toValue: endingPos,
-      duration: 60000 / BPM,
-      easing: Easing.linear,
-      useNativeDriver: false,
-      loop: alse,
+    Animated.sequence([
+      Animated.timing(rotateValueHolder, {
+        toValue: 1,
+        duration: 60000 / BPM,
+        easing: Easing.linear,
+        useNativeDriver: false,
+        loop: false,
+      }),
+      Animated.timing(rotateValueHolder, {
+        toValue: 0.5,
+        duration: 60000 / BPM,
+        easing: Easing.linear,
+        useNativeDriver: false,
+        loop: false,
+      }),
+      Animated.timing(rotateValueHolder, {
+        toValue: 0,
+        duration: 60000 / BPM,
+        easing: Easing.linear,
+        useNativeDriver: false,
+        loop: false,
+      }),
+      Animated.timing(rotateValueHolder, {
+        toValue: 0.5,
+        duration: 60000 / BPM,
+        easing: Easing.linear,
+        useNativeDriver: false,
+        loop: false,
+      }),
+    ]).start(() => {
+      startMetronome();
     });
-    animation.current.start(() => {
-      if (metronomInicializator) {
-        startMetronome();
-      }
-      setTik((prev) => prev + 1);
-      if (tik % period == 0) {
-        periodSignal = !periodSignal;
-      } else {
-        periodSignal = !periodSignal;
-      }
-      // console.log("spoustim");
-      // startMetronome();
-    });
-
-    // console.log("vypinam tvoji mamu");
-    // rotateValueHolder.setValue(0);
-    // Animated.timing(rotateValueHolder).stop();
-
-    // animation.current.stop();
-    // stopMetronome();
   };
-
-  // const stopMetronome = () => {
-  //   animation.current.stop();
-  // };
 
   // start and stop the metronome
   const toggleMetronome = () => {
-    // console.log(metronomInicializator);
     setMetronomeInicializator(!metronomInicializator);
   };
 
   useEffect(() => {
-    console.log(metronomInicializator);
-    startMetronome();
-    /* else if (!metronomInicializator) {
-      standByMetronom();
-    } */
+    if (metronomInicializator) {
+      startMetronome();
+    }
   }, [metronomInicializator]);
 
   const RotatePointer = rotateValueHolder.interpolate({
@@ -95,15 +72,16 @@ export default function Metronome() {
     outputRange: ["-35deg", "35deg"],
   });
 
-  RotatePointer.addListener(({ value }) => {
-    setPointerPosition(value);
-  });
+  // HERE IS THE POINK SOUND SOLUTION
+  // RotatePointer.addListener(({ value }) => {
+  //   setPointerPosition(value);
+  // });
 
-  if (pointerPosition === -35) {
-    console.log("-35");
-  } else if (pointerPosition === 35) {
-    console.log("35");
-  }
+  // if (pointerPosition === -35) {
+  //   console.log("-35");
+  // } else if (pointerPosition === 35) {
+  //   console.log("35");
+  // }
 
   return (
     <>
