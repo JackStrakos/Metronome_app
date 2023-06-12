@@ -21,6 +21,8 @@ export default function Metronome() {
   let periodSignal = false;
   const rotateValueHolder = useRef(new Animated.Value(0.5)).current;
 
+
+   const arr = [0,0.5,1,0.5]
   const startMetronome = () => {
     Animated.sequence([
       Animated.timing(rotateValueHolder, {
@@ -85,51 +87,59 @@ export default function Metronome() {
 
   return (
     <>
-      <View style={styles.setMetronome}>
-        <View style={styles.periodHolder}>
-          <Text style={styles.period}>Period: </Text>
-          <TextInput
-            style={styles.period}
-            onChangeText={(text) => setPeriod(text)}
-            value={period}
-            keyboardType="numeric"
-            placeholder={period}
-          />
-          <Text style={styles.period}> / </Text>
-          <TextInput
-            style={styles.period}
-            onChangeText={(text) => setPeriodFrom(text)}
-            value={periodFrom}
-            keyboardType="numeric"
-            placeholder={periodFrom}
-          />
+      <View style={styles.coolio}>
+        <View style={styles.setMetronome}>
+          <View style={styles.periodHolder}>
+            <Text style={styles.period}>Period: </Text>
+            <TextInput
+              style={styles.period}
+              onChangeText={(text) => setPeriod(text)}
+              value={period}
+              keyboardType="numeric"
+              placeholder={period}
+            />
+            <Text style={styles.period}> / </Text>
+            <TextInput
+              style={styles.period}
+              onChangeText={(text) => setPeriodFrom(text)}
+              value={periodFrom}
+              keyboardType="numeric"
+              placeholder={periodFrom}
+            />
+          </View>
+          <View style={styles.BPMLabel}>
+            <Text style={styles.BMP}>BPM: </Text>
+            <TextInput
+              style={styles.BMP}
+              onChangeText={(text) => setBPM(text)}
+              value={BPM}
+              keyboardType="numeric"
+              placeholder={BPM}
+            />
+          </View>
         </View>
-        <View style={styles.BPMLabel}>
-          <Text style={styles.BMP}>BPM: </Text>
-          <TextInput
-            style={styles.BMP}
-            onChangeText={(text) => setBPM(text)}
-            value={BPM}
-            keyboardType="numeric"
-            placeholder={BPM}
-          />
+        <View style={styles.pointerCoolio}>
+          <Animated.View style={[styles.pointerFlex, { transform: [{ rotate: RotatePointer }] }]}>
+            <Image style={styles.pointer} source={require("../assets/pointer.png")} />
+            <View style={styles.periodSignal}></View>
+          </Animated.View>
         </View>
+        <Text style={styles.pong}>{tik}</Text>
+        <TouchableHighlight style={styles.titleText} onPress={toggleMetronome}>
+          <Text style={styles.title}>We are workin on the motronome app!</Text>
+        </TouchableHighlight>
       </View>
-      <View style={styles.pointerCoolio}>
-        <Animated.View style={[styles.pointerFlex, { transform: [{ rotate: RotatePointer }] }]}>
-          <Image style={styles.pointer} source={require("../assets/pointer.png")} />
-          <View style={styles.periodSignal}></View>
-        </Animated.View>
-      </View>
-      <Text style={styles.pong}>{tik}</Text>
-      <TouchableHighlight style={styles.titleText} onPress={toggleMetronome}>
-        <Text style={styles.title}>We are workin on the motronome app!</Text>
-      </TouchableHighlight>
     </>
   );
 }
 
 const styles = StyleSheet.create({
+  coolio: {
+    flex: 1,
+    backgroundColor: "#BBB",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   titleText: {
     padding: 5,
     backgroundColor: "#8a8aeb",
